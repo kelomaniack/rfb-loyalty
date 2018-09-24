@@ -1,30 +1,37 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
 
-import { NgbActiveModal, NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { JhiEventManager } from 'ng-jhipster';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {JhiEventManager} from 'ng-jhipster';
 
-import { IRfbEvent } from 'app/shared/model/rfb-event.model';
-import { RfbEventService } from './rfb-event.service';
+import {RfbEvent} from './rfb-event.model';
+import {RfbEventPopupService} from './rfb-event-popup.service';
+import {RfbEventService} from './rfb-event.service';
 
 @Component({
     selector: 'jhi-rfb-event-delete-dialog',
     templateUrl: './rfb-event-delete-dialog.component.html'
 })
 export class RfbEventDeleteDialogComponent {
-    rfbEvent: IRfbEvent;
 
-    constructor(private rfbEventService: RfbEventService, public activeModal: NgbActiveModal, private eventManager: JhiEventManager) {}
+    rfbEvent: RfbEvent;
+
+    constructor(
+        private rfbEventService: RfbEventService,
+        public activeModal: NgbActiveModal,
+        private eventManager: JhiEventManager
+    ) {
+    }
 
     clear() {
         this.activeModal.dismiss('cancel');
     }
 
     confirmDelete(id: number) {
-        this.rfbEventService.delete(id).subscribe(response => {
+        this.rfbEventService.delete(id).subscribe((response) => {
             this.eventManager.broadcast({
                 name: 'rfbEventListModification',
-                content: 'Deleted an rfbEvent'
+                content: 'Deleted an Event'
             });
             this.activeModal.dismiss(true);
         });
@@ -36,30 +43,22 @@ export class RfbEventDeleteDialogComponent {
     template: ''
 })
 export class RfbEventDeletePopupComponent implements OnInit, OnDestroy {
-    private ngbModalRef: NgbModalRef;
 
-    constructor(private activatedRoute: ActivatedRoute, private router: Router, private modalService: NgbModal) {}
+    routeSub: any;
+
+    constructor(
+        private route: ActivatedRoute,
+        private rfbEventPopupService: RfbEventPopupService
+    ) {}
 
     ngOnInit() {
-        this.activatedRoute.data.subscribe(({ rfbEvent }) => {
-            setTimeout(() => {
-                this.ngbModalRef = this.modalService.open(RfbEventDeleteDialogComponent as Component, { size: 'lg', backdrop: 'static' });
-                this.ngbModalRef.componentInstance.rfbEvent = rfbEvent;
-                this.ngbModalRef.result.then(
-                    result => {
-                        this.router.navigate([{ outlets: { popup: null } }], { replaceUrl: true, queryParamsHandling: 'merge' });
-                        this.ngbModalRef = null;
-                    },
-                    reason => {
-                        this.router.navigate([{ outlets: { popup: null } }], { replaceUrl: true, queryParamsHandling: 'merge' });
-                        this.ngbModalRef = null;
-                    }
-                );
-            }, 0);
+        this.routeSub = this.route.params.subscribe((params) => {
+            this.rfbEventPopupService
+                .open(RfbEventDeleteDialogComponent as Component, params['id']);
         });
     }
 
     ngOnDestroy() {
-        this.ngbModalRef = null;
+        this.routeSub.unsubscribe();
     }
 }

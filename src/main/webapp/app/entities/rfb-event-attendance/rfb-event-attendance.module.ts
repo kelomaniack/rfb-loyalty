@@ -1,33 +1,48 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {CUSTOM_ELEMENTS_SCHEMA, NgModule} from '@angular/core';
+import {RouterModule} from '@angular/router';
 
-import { RfbloyaltySharedModule } from 'app/shared';
+import {RfbloyaltySharedModule} from '../../shared';
 import {
     RfbEventAttendanceComponent,
-    RfbEventAttendanceDetailComponent,
-    RfbEventAttendanceUpdateComponent,
-    RfbEventAttendanceDeletePopupComponent,
     RfbEventAttendanceDeleteDialogComponent,
+    RfbEventAttendanceDeletePopupComponent,
+    RfbEventAttendanceDetailComponent,
+    RfbEventAttendanceDialogComponent,
+    RfbEventAttendancePopupComponent,
+    rfbEventAttendancePopupRoute,
+    RfbEventAttendancePopupService,
     rfbEventAttendanceRoute,
-    rfbEventAttendancePopupRoute
+    RfbEventAttendanceService,
 } from './';
 
-const ENTITY_STATES = [...rfbEventAttendanceRoute, ...rfbEventAttendancePopupRoute];
+const ENTITY_STATES = [
+    ...rfbEventAttendanceRoute,
+    ...rfbEventAttendancePopupRoute,
+];
 
 @NgModule({
-    imports: [RfbloyaltySharedModule, RouterModule.forChild(ENTITY_STATES)],
+    imports: [
+        RfbloyaltySharedModule,
+        RouterModule.forRoot(ENTITY_STATES, { useHash: true })
+    ],
     declarations: [
         RfbEventAttendanceComponent,
         RfbEventAttendanceDetailComponent,
-        RfbEventAttendanceUpdateComponent,
+        RfbEventAttendanceDialogComponent,
         RfbEventAttendanceDeleteDialogComponent,
-        RfbEventAttendanceDeletePopupComponent
+        RfbEventAttendancePopupComponent,
+        RfbEventAttendanceDeletePopupComponent,
     ],
     entryComponents: [
         RfbEventAttendanceComponent,
-        RfbEventAttendanceUpdateComponent,
+        RfbEventAttendanceDialogComponent,
+        RfbEventAttendancePopupComponent,
         RfbEventAttendanceDeleteDialogComponent,
-        RfbEventAttendanceDeletePopupComponent
+        RfbEventAttendanceDeletePopupComponent,
+    ],
+    providers: [
+        RfbEventAttendanceService,
+        RfbEventAttendancePopupService,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

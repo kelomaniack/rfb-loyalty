@@ -1,13 +1,13 @@
 import { Route } from '@angular/router';
 
-import { UserRouteAccessService } from 'app/core';
+import { UserRouteAccessService } from '../../shared';
 import { PasswordComponent } from './password.component';
 
 export const passwordRoute: Route = {
     path: 'password',
     component: PasswordComponent,
     data: {
-        authorities: ['ROLE_USER'],
+        authorities: ['ROLE_RUNNER', 'ROLE_ORGANIZER'],
         pageTitle: 'Password'
     },
     canActivate: [UserRouteAccessService]

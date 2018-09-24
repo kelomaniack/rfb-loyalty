@@ -1,40 +1,41 @@
-import { JhiAlertService } from 'ng-jhipster';
-import { HttpInterceptor, HttpRequest, HttpResponse, HttpHandler, HttpEvent } from '@angular/common/http';
+import { JhiAlertService, JhiHttpInterceptor } from 'ng-jhipster';
+import { RequestOptionsArgs, Response } from '@angular/http';
 import { Injector } from '@angular/core';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable } from 'rxjs/Observable';
 
-export class NotificationInterceptor implements HttpInterceptor {
+export class NotificationInterceptor extends JhiHttpInterceptor {
+
     private alertService: JhiAlertService;
 
-    // tslint:disable-next-line: no-unused-variable
     constructor(private injector: Injector) {
-        setTimeout(() => (this.alertService = injector.get(JhiAlertService)));
+        super();
+        setTimeout(() => this.alertService = injector.get(JhiAlertService));
     }
 
-    intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        return next.handle(request).pipe(
-            tap(
-                (event: HttpEvent<any>) => {
-                    if (event instanceof HttpResponse) {
-                        const arr = event.headers.keys();
-                        let alert = null;
-                        arr.forEach(entry => {
-                            if (entry.toLowerCase().endsWith('app-alert')) {
-                                alert = event.headers.get(entry);
-                            }
-                        });
-                        if (alert) {
-                            if (typeof alert === 'string') {
-                                if (this.alertService) {
-                                    this.alertService.success(alert, null, null);
-                                }
-                            }
-                        }
+    requestIntercept(options?: RequestOptionsArgs): RequestOptionsArgs {
+        return options;
+    }
+
+    responseIntercept(observable: Observable<Response>): Observable<Response> {
+        return observable.map((response: Response) => {
+            const headers = [];
+            response.headers.forEach((value, name) => {
+                if (name.toLowerCase().endsWith('app-alert') || name.toLowerCase().endsWith('app-params')) {
+                    headers.push(name);
+                }
+            });
+            if (headers.length > 1) {
+                headers.sort();
+                const alertKey = response.headers.get(headers[ 0 ]);
+                if (typeof alertKey === 'string') {
+                    if (this.alertService) {
+                        this.alertService.success(alertKey, null, null);
                     }
-                },
-                (err: any) => {}
-            )
-        );
+                }
+            }
+            return response;
+        }).catch((error) => {
+            return Observable.throw(error); // here, response is an error
+        });
     }
 }

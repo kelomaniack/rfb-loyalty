@@ -1,40 +1,62 @@
 /* tslint:disable max-line-length */
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
-
-import { RfbloyaltyTestModule } from '../../../test.module';
-import { RfbEventDetailComponent } from 'app/entities/rfb-event/rfb-event-detail.component';
-import { RfbEvent } from 'app/shared/model/rfb-event.model';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {OnInit} from '@angular/core';
+import {DatePipe} from '@angular/common';
+import {ActivatedRoute} from '@angular/router';
+import {Observable} from 'rxjs/Rx';
+import {JhiDataUtils, JhiDateUtils, JhiEventManager} from 'ng-jhipster';
+import {RfbloyaltyTestModule} from '../../../test.module';
+import {MockActivatedRoute} from '../../../helpers/mock-route.service';
+import {RfbEventDetailComponent} from '../../../../../../main/webapp/app/entities/rfb-event/rfb-event-detail.component';
+import {RfbEventService} from '../../../../../../main/webapp/app/entities/rfb-event/rfb-event.service';
+import {RfbEvent} from '../../../../../../main/webapp/app/entities/rfb-event/rfb-event.model';
 
 describe('Component Tests', () => {
+
     describe('RfbEvent Management Detail Component', () => {
         let comp: RfbEventDetailComponent;
         let fixture: ComponentFixture<RfbEventDetailComponent>;
-        const route = ({ data: of({ rfbEvent: new RfbEvent(123) }) } as any) as ActivatedRoute;
+        let service: RfbEventService;
 
-        beforeEach(() => {
+        beforeEach(async(() => {
             TestBed.configureTestingModule({
                 imports: [RfbloyaltyTestModule],
                 declarations: [RfbEventDetailComponent],
-                providers: [{ provide: ActivatedRoute, useValue: route }]
-            })
-                .overrideTemplate(RfbEventDetailComponent, '')
-                .compileComponents();
+                providers: [
+                    JhiDateUtils,
+                    JhiDataUtils,
+                    DatePipe,
+                    {
+                        provide: ActivatedRoute,
+                        useValue: new MockActivatedRoute({id: 123})
+                    },
+                    RfbEventService,
+                    JhiEventManager
+                ]
+            }).overrideTemplate(RfbEventDetailComponent, '')
+            .compileComponents();
+        }));
+
+        beforeEach(() => {
             fixture = TestBed.createComponent(RfbEventDetailComponent);
             comp = fixture.componentInstance;
+            service = fixture.debugElement.injector.get(RfbEventService);
         });
 
         describe('OnInit', () => {
             it('Should call load all on init', () => {
-                // GIVEN
+            // GIVEN
 
-                // WHEN
-                comp.ngOnInit();
+            spyOn(service, 'find').and.returnValue(Observable.of(new RfbEvent(10)));
 
-                // THEN
-                expect(comp.rfbEvent).toEqual(jasmine.objectContaining({ id: 123 }));
+            // WHEN
+            comp.ngOnInit();
+
+            // THEN
+            expect(service.find).toHaveBeenCalledWith(123);
+            expect(comp.rfbEvent).toEqual(jasmine.objectContaining({id: 10}));
             });
         });
     });
+
 });

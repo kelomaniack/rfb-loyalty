@@ -3,12 +3,12 @@ Navbar
 ========================================================================== */
 .navbar-version {
     font-size: 10px;
-    color: #ccc;
+    color: #ccc
 }
 
 .jh-navbar {
-    background-color: #353d47;
-    padding: 0.2em 1em;
+    background-color: #ffffff;
+    padding: .2em 1em;
 }
 
 .jh-navbar .profile-image {
@@ -18,9 +18,7 @@ Navbar
     border-radius: 50%;
 }
 
-.jh-navbar .dropdown-item.active,
-.jh-navbar .dropdown-item.active:focus,
-.jh-navbar .dropdown-item.active:hover {
+.jh-navbar .dropdown-item.active, .jh-navbar .dropdown-item.active:focus, .jh-navbar .dropdown-item.active:hover {
     background-color: #353d47;
 }
 
@@ -38,6 +36,7 @@ Navbar
 
 .jh-navbar a.nav-link {
     font-weight: 400;
+    color: #000000;
 }
 
 .jh-navbar .jh-navbar-toggler {
@@ -74,16 +73,16 @@ Logo styles
     padding: 5px 15px;
 }
 
-.logo-img {
-    height: 100%;
-    background: url('../../../content/images/logo-jhipster.png') no-repeat center center;
-    background-size: contain;
-    width: 100%;
-}
-
 .logo .logo-img {
-    height: 45px;
+    height: 60px;
     display: inline-block;
     vertical-align: middle;
-    width: 70px;
+    width: 150px;
+}
+
+.logo-img {
+    height: 100%;
+    background: url("../../../content/images/rfb_logo_small.png") no-repeat center center;
+    background-size: contain;
+    width: 100%;
 }

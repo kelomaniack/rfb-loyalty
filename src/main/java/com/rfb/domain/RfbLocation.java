@@ -1,19 +1,21 @@
 package com.rfb.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
-
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A RfbLocation.
  */
 @Entity
 @Table(name = "rfb_location")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class RfbLocation implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -29,9 +31,11 @@ public class RfbLocation implements Serializable {
     private Integer runDayOfWeek;
 
     @OneToMany(mappedBy = "rfbLocation")
+    @JsonIgnore
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<RfbEvent> rvbEvents = new HashSet<>();
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
+    // jhipster-needle-entity-add-field - Jhipster will add fields here, do not remove
     public Long getId() {
         return id;
     }
@@ -90,7 +94,7 @@ public class RfbLocation implements Serializable {
     public void setRvbEvents(Set<RfbEvent> rfbEvents) {
         this.rvbEvents = rfbEvents;
     }
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
+    // jhipster-needle-entity-add-getters-setters - Jhipster will add getters and setters here, do not remove
 
     @Override
     public boolean equals(Object o) {
@@ -117,7 +121,7 @@ public class RfbLocation implements Serializable {
         return "RfbLocation{" +
             "id=" + getId() +
             ", locationName='" + getLocationName() + "'" +
-            ", runDayOfWeek=" + getRunDayOfWeek() +
+            ", runDayOfWeek='" + getRunDayOfWeek() + "'" +
             "}";
     }
 }

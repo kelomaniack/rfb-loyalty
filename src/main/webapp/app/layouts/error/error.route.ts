@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 
+import { UserRouteAccessService } from '../../shared';
 import { ErrorComponent } from './error.component';
 
 export const errorRoute: Routes = [
@@ -8,16 +9,16 @@ export const errorRoute: Routes = [
         component: ErrorComponent,
         data: {
             authorities: [],
-            pageTitle: 'rfbloyalty'
-        }
+            pageTitle: 'Error page!'
+        },
     },
     {
         path: 'accessdenied',
         component: ErrorComponent,
         data: {
             authorities: [],
-            pageTitle: 'rfbloyalty',
+            pageTitle: 'Error page!',
             error403: true
-        }
+        },
     }
 ];

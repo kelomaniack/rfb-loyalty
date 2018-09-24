@@ -3,8 +3,8 @@
 #
 # This configuration is used for unit/integration tests.
 #
-# More information on profiles: https://www.jhipster.tech/profiles/
-# More information on configuration properties: https://www.jhipster.tech/common-application-properties/
+# More information on profiles: http://www.jhipster.tech/profiles/
+# More information on configuration properties: http://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
 # ===================================================================
@@ -17,16 +17,16 @@
 spring:
     application:
         name: rfbloyalty
+    jackson:
+        serialization.write_dates_as_timestamps: false
     cache:
-        type: simple
+        type: none
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:h2:mem:rfbloyalty;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+        url: jdbc:h2:mem:rfbloyalty;DB_CLOSE_DELAY=-1
         name:
         username:
         password:
-        hikari:
-            auto-commit: false
     jpa:
         database-platform: io.github.jhipster.domain.util.FixedH2Dialect
         database: H2
@@ -39,13 +39,10 @@ spring:
                 implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
         properties:
             hibernate.id.new_generator_mappings: true
-            hibernate.connection.provider_disables_autocommit: true
             hibernate.cache.use_second_level_cache: false
             hibernate.cache.use_query_cache: false
             hibernate.generate_statistics: true
             hibernate.hbm2ddl.auto: validate
-    liquibase:
-        contexts: test
     mail:
         host: localhost
     messages:
@@ -54,8 +51,14 @@ spring:
         favicon:
             enabled: false
     thymeleaf:
-        mode: HTML
+        mode: XHTML
 
+liquibase:
+    contexts: test
+
+security:
+    basic:
+        enabled: false
 
 server:
     port: 10344
@@ -68,7 +71,7 @@ info:
 # ===================================================================
 # JHipster specific properties
 #
-# Full reference is available at: https://www.jhipster.tech/common-application-properties/
+# Full reference is available at: http://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
 jhipster:
@@ -89,7 +92,7 @@ jhipster:
     security:
         remember-me:
             # security key (this key should be unique for your application, and kept secret)
-            key: eaab5c6bf7666afcb96edb963ff74537e4fc6ae15b538c2dbd4c5629eb9914a6452f73576a33f087e9917c98f420b4f53e88
+            key: 6502974dc68c39295f86f41c6a971220553ea298
     metrics: # DropWizard Metrics configuration, used by MetricsConfiguration
         jmx.enabled: true
         logs: # Reports Dropwizard metrics in the logs
@@ -102,7 +105,7 @@ jhipster:
 # to have type-safe configuration, like in the JHipsterProperties above
 #
 # More documentation is available at:
-# https://www.jhipster.tech/common-application-properties/
+# http://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+application:

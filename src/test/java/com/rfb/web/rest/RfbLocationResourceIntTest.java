@@ -1,14 +1,12 @@
 package com.rfb.web.rest;
 
 import com.rfb.RfbloyaltyApp;
-
 import com.rfb.domain.RfbLocation;
 import com.rfb.repository.RfbLocationRepository;
 import com.rfb.service.RfbLocationService;
 import com.rfb.service.dto.RfbLocationDTO;
 import com.rfb.service.mapper.RfbLocationMapper;
 import com.rfb.web.rest.errors.ExceptionTranslator;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,8 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.util.List;
 
-
-import static com.rfb.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -53,7 +49,7 @@ public class RfbLocationResourceIntTest {
 
     @Autowired
     private RfbLocationMapper rfbLocationMapper;
-    
+
     @Autowired
     private RfbLocationService rfbLocationService;
 
@@ -80,7 +76,6 @@ public class RfbLocationResourceIntTest {
         this.restRfbLocationMockMvc = MockMvcBuilders.standaloneSetup(rfbLocationResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
             .setMessageConverters(jacksonMessageConverter).build();
     }
 
@@ -156,7 +151,7 @@ public class RfbLocationResourceIntTest {
             .andExpect(jsonPath("$.[*].locationName").value(hasItem(DEFAULT_LOCATION_NAME.toString())))
             .andExpect(jsonPath("$.[*].runDayOfWeek").value(hasItem(DEFAULT_RUN_DAY_OF_WEEK)));
     }
-    
+
     @Test
     @Transactional
     public void getRfbLocation() throws Exception {
@@ -185,13 +180,10 @@ public class RfbLocationResourceIntTest {
     public void updateRfbLocation() throws Exception {
         // Initialize the database
         rfbLocationRepository.saveAndFlush(rfbLocation);
-
         int databaseSizeBeforeUpdate = rfbLocationRepository.findAll().size();
 
         // Update the rfbLocation
-        RfbLocation updatedRfbLocation = rfbLocationRepository.findById(rfbLocation.getId()).get();
-        // Disconnect from session so that the updates on updatedRfbLocation are not directly saved in db
-        em.detach(updatedRfbLocation);
+        RfbLocation updatedRfbLocation = rfbLocationRepository.findOne(rfbLocation.getId());
         updatedRfbLocation
             .locationName(UPDATED_LOCATION_NAME)
             .runDayOfWeek(UPDATED_RUN_DAY_OF_WEEK);
@@ -218,15 +210,15 @@ public class RfbLocationResourceIntTest {
         // Create the RfbLocation
         RfbLocationDTO rfbLocationDTO = rfbLocationMapper.toDto(rfbLocation);
 
-        // If the entity doesn't have an ID, it will throw BadRequestAlertException
+        // If the entity doesn't have an ID, it will be created instead of just being updated
         restRfbLocationMockMvc.perform(put("/api/rfb-locations")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(rfbLocationDTO)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isCreated());
 
         // Validate the RfbLocation in the database
         List<RfbLocation> rfbLocationList = rfbLocationRepository.findAll();
-        assertThat(rfbLocationList).hasSize(databaseSizeBeforeUpdate);
+        assertThat(rfbLocationList).hasSize(databaseSizeBeforeUpdate + 1);
     }
 
     @Test
@@ -234,7 +226,6 @@ public class RfbLocationResourceIntTest {
     public void deleteRfbLocation() throws Exception {
         // Initialize the database
         rfbLocationRepository.saveAndFlush(rfbLocation);
-
         int databaseSizeBeforeDelete = rfbLocationRepository.findAll().size();
 
         // Get the rfbLocation

@@ -1,14 +1,12 @@
 package com.rfb.web.rest;
 
 import com.rfb.RfbloyaltyApp;
-
 import com.rfb.domain.RfbEventAttendance;
 import com.rfb.repository.RfbEventAttendanceRepository;
 import com.rfb.service.RfbEventAttendanceService;
 import com.rfb.service.dto.RfbEventAttendanceDTO;
 import com.rfb.service.mapper.RfbEventAttendanceMapper;
 import com.rfb.web.rest.errors.ExceptionTranslator;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,8 +26,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
-
-import static com.rfb.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -52,7 +48,7 @@ public class RfbEventAttendanceResourceIntTest {
 
     @Autowired
     private RfbEventAttendanceMapper rfbEventAttendanceMapper;
-    
+
     @Autowired
     private RfbEventAttendanceService rfbEventAttendanceService;
 
@@ -79,7 +75,6 @@ public class RfbEventAttendanceResourceIntTest {
         this.restRfbEventAttendanceMockMvc = MockMvcBuilders.standaloneSetup(rfbEventAttendanceResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
             .setMessageConverters(jacksonMessageConverter).build();
     }
 
@@ -152,7 +147,7 @@ public class RfbEventAttendanceResourceIntTest {
             .andExpect(jsonPath("$.[*].id").value(hasItem(rfbEventAttendance.getId().intValue())))
             .andExpect(jsonPath("$.[*].attendanceDate").value(hasItem(DEFAULT_ATTENDANCE_DATE.toString())));
     }
-    
+
     @Test
     @Transactional
     public void getRfbEventAttendance() throws Exception {
@@ -180,13 +175,10 @@ public class RfbEventAttendanceResourceIntTest {
     public void updateRfbEventAttendance() throws Exception {
         // Initialize the database
         rfbEventAttendanceRepository.saveAndFlush(rfbEventAttendance);
-
         int databaseSizeBeforeUpdate = rfbEventAttendanceRepository.findAll().size();
 
         // Update the rfbEventAttendance
-        RfbEventAttendance updatedRfbEventAttendance = rfbEventAttendanceRepository.findById(rfbEventAttendance.getId()).get();
-        // Disconnect from session so that the updates on updatedRfbEventAttendance are not directly saved in db
-        em.detach(updatedRfbEventAttendance);
+        RfbEventAttendance updatedRfbEventAttendance = rfbEventAttendanceRepository.findOne(rfbEventAttendance.getId());
         updatedRfbEventAttendance
             .attendanceDate(UPDATED_ATTENDANCE_DATE);
         RfbEventAttendanceDTO rfbEventAttendanceDTO = rfbEventAttendanceMapper.toDto(updatedRfbEventAttendance);
@@ -211,15 +203,15 @@ public class RfbEventAttendanceResourceIntTest {
         // Create the RfbEventAttendance
         RfbEventAttendanceDTO rfbEventAttendanceDTO = rfbEventAttendanceMapper.toDto(rfbEventAttendance);
 
-        // If the entity doesn't have an ID, it will throw BadRequestAlertException
+        // If the entity doesn't have an ID, it will be created instead of just being updated
         restRfbEventAttendanceMockMvc.perform(put("/api/rfb-event-attendances")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(rfbEventAttendanceDTO)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isCreated());
 
         // Validate the RfbEventAttendance in the database
         List<RfbEventAttendance> rfbEventAttendanceList = rfbEventAttendanceRepository.findAll();
-        assertThat(rfbEventAttendanceList).hasSize(databaseSizeBeforeUpdate);
+        assertThat(rfbEventAttendanceList).hasSize(databaseSizeBeforeUpdate + 1);
     }
 
     @Test
@@ -227,7 +219,6 @@ public class RfbEventAttendanceResourceIntTest {
     public void deleteRfbEventAttendance() throws Exception {
         // Initialize the database
         rfbEventAttendanceRepository.saveAndFlush(rfbEventAttendance);
-
         int databaseSizeBeforeDelete = rfbEventAttendanceRepository.findAll().size();
 
         // Get the rfbEventAttendance

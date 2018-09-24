@@ -1,40 +1,44 @@
+import { JhiHttpInterceptor } from 'ng-jhipster';
 import { Injector } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { AuthServerProvider } from 'app/core/auth/auth-session.service';
-import { LoginModalService } from 'app/core/login/login-modal.service';
-import { StateStorageService } from 'app/core/auth/state-storage.service';
+import { RequestOptionsArgs, Response } from '@angular/http';
+import { Router } from '@angular/router/router';
+import { Observable } from 'rxjs/Observable';
+import { AuthServerProvider } from '../../shared/auth/auth-session.service';
+import { StateStorageService } from '../../shared/auth/state-storage.service';
+import { LoginModalService } from '../../shared/login/login-modal.service';
 
-export class AuthExpiredInterceptor implements HttpInterceptor {
-    constructor(private stateStorageService: StateStorageService, private injector: Injector) {}
+export class AuthExpiredInterceptor extends JhiHttpInterceptor {
 
-    intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        return next.handle(request).pipe(
-            tap(
-                (event: HttpEvent<any>) => {},
-                (err: any) => {
-                    if (err instanceof HttpErrorResponse) {
-                        if (err.status === 401 && err.url && !err.url.includes('/api/account')) {
-                            const destination = this.stateStorageService.getDestinationState();
-                            if (destination !== null) {
-                                const to = destination.destination;
-                                const toParams = destination.params;
-                                if (to.name === 'accessdenied') {
-                                    this.stateStorageService.storePreviousState(to.name, toParams);
-                                }
-                            } else {
-                                this.stateStorageService.storeUrl('/');
-                            }
+    constructor(private injector: Injector,
+        private stateStorageService: StateStorageService,
+        private router: Router) {
+        super();
+    }
 
-                            const authServer: AuthServerProvider = this.injector.get(AuthServerProvider);
-                            authServer.logout();
-                            const loginModalService: LoginModalService = this.injector.get(LoginModalService);
-                            loginModalService.open();
-                        }
+    requestIntercept(options?: RequestOptionsArgs): RequestOptionsArgs {
+        return options;
+    }
+
+    responseIntercept(observable: Observable<Response>): Observable<Response> {
+        return <Observable<Response>> observable.catch((error) => {
+            if (error.status === 401 && error.text() !== '' && error.json().path && error.json().path.indexOf('/api/account') === -1) {
+                const authServerProvider = this.injector.get(AuthServerProvider);
+                const destination = this.stateStorageService.getDestinationState();
+                if (destination !== null) {
+                    const to = destination.destination;
+                    const toParams = destination.params;
+                    if (to.name === 'accessdenied') {
+                        this.stateStorageService.storePreviousState(to.name, toParams);
                     }
+                } else {
+                    this.stateStorageService.storeUrl('/');
                 }
-            )
-        );
+                authServerProvider.logout();
+                const loginServiceModal = this.injector.get(LoginModalService);
+                loginServiceModal.open();
+
+            }
+            return Observable.throw(error);
+        });
     }
 }

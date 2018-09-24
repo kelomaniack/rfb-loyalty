@@ -3,8 +3,8 @@
 #
 # This configuration overrides the application.yml file.
 #
-# More information on profiles: https://www.jhipster.tech/profiles/
-# More information on configuration properties: https://www.jhipster.tech/common-application-properties/
+# More information on profiles: http://www.jhipster.tech/profiles/
+# More information on configuration properties: http://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
 # ===================================================================
@@ -13,33 +13,22 @@
 # http://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html
 # ===================================================================
 
-logging:
-    level:
-        ROOT: DEBUG
-        io.github.jhipster: DEBUG
-        com.rfb: DEBUG
-
 spring:
     profiles:
         active: dev
-        include:
-            - swagger
-            # Uncomment to activate TLS for the dev profile
-            #- tls
+        include: swagger
     devtools:
         restart:
             enabled: true
         livereload:
-            enabled: false # we use Webpack dev server + BrowserSync for livereload
+            enabled: false # we use gulp + BrowserSync for livereload
     jackson:
         serialization.indent_output: true
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:h2:mem:rfbloyalty;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+        url: jdbc:h2:mem:rfbloyalty;DB_CLOSE_DELAY=-1
         username: rfbloyalty
         password:
-        hikari:
-            auto-commit: false
     h2:
         console:
             enabled: false
@@ -49,34 +38,52 @@ spring:
         show-sql: true
         properties:
             hibernate.id.new_generator_mappings: true
-            hibernate.connection.provider_disables_autocommit: true
-            hibernate.cache.use_second_level_cache: false
+            hibernate.cache.use_second_level_cache: true
             hibernate.cache.use_query_cache: false
             hibernate.generate_statistics: true
-    liquibase:
-        contexts: dev
+            hibernate.cache.region.factory_class: io.github.jhipster.config.jcache.NoDefaultJCacheRegionFactory
     mail:
         host: localhost
-        port: 25
+        port: 1025
         username:
         password:
     messages:
-        cache-duration: PT1S # 1 second, see the ISO 8601 standard
+        cache-seconds: 1
     thymeleaf:
         cache: false
 
+liquibase:
+    contexts: dev
+
+# ===================================================================
+# To enable SSL, generate a certificate using:
+# keytool -genkey -alias rfbloyalty -storetype PKCS12 -keyalg RSA -keysize 2048 -keystore keystore.p12 -validity 3650
+#
+# You can also use Let's Encrypt:
+# https://maximilian-boehm.com/hp2121/Create-a-Java-Keystore-JKS-from-Let-s-Encrypt-Certificates.htm
+#
+# Then, modify the server.ssl properties so your "server" configuration looks like:
+#
+# server:
+#    port: 8443
+#    ssl:
+#        key-store: keystore.p12
+#        key-store-password: <your-password>
+#        keyStoreType: PKCS12
+#        keyAlias: rfbloyalty
+# ===================================================================
 server:
     port: 8080
 
 # ===================================================================
 # JHipster specific properties
 #
-# Full reference is available at: https://www.jhipster.tech/common-application-properties/
+# Full reference is available at: http://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
 jhipster:
     http:
-        version: V_1_1 # To use HTTP/2 you will need to activate TLS (see application-tls.yml)
+        version: V_1_1 # To use HTTP/2 you will need SSL support (see above the "server.ssl" configuration)
     cache: # Cache configuration
         ehcache: # Ehcache configuration
             time-to-live-seconds: 3600 # By default objects stay 1 hour in the cache
@@ -86,19 +93,25 @@ jhipster:
         allowed-origins: "*"
         allowed-methods: "*"
         allowed-headers: "*"
-        exposed-headers: "Link,X-Total-Count"
         allow-credentials: true
         max-age: 1800
     security:
         remember-me:
             # security key (this key should be unique for your application, and kept secret)
-            key: eaab5c6bf7666afcb96edb963ff74537e4fc6ae15b538c2dbd4c5629eb9914a6452f73576a33f087e9917c98f420b4f53e88
+            key: 6502974dc68c39295f86f41c6a971220553ea298
     mail: # specific JHipster mail property, for standard properties see MailProperties
         from: rfbloyalty@localhost
         base-url: http://127.0.0.1:8080
     metrics: # DropWizard Metrics configuration, used by MetricsConfiguration
-        jmx:
-            enabled: true
+        jmx.enabled: true
+        graphite: # Use the "graphite" Maven profile to have the Graphite dependencies
+            enabled: false
+            host: localhost
+            port: 2003
+            prefix: rfbloyalty
+        prometheus: # Use the "prometheus" Maven profile to have the Prometheus dependencies
+            enabled: false
+            endpoint: /prometheusMetrics
         logs: # Reports Dropwizard metrics in the logs
             enabled: false
             report-frequency: 60 # in seconds
@@ -115,7 +128,7 @@ jhipster:
 # to have type-safe configuration, like in the JHipsterProperties above
 #
 # More documentation is available at:
-# https://www.jhipster.tech/common-application-properties/
+# http://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+application:

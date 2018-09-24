@@ -1,21 +1,22 @@
 package com.rfb.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A RfbEvent.
  */
 @Entity
 @Table(name = "rfb_event")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class RfbEvent implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,13 +32,14 @@ public class RfbEvent implements Serializable {
     private String eventCode;
 
     @ManyToOne
-    @JsonIgnoreProperties("rvbEvents")
     private RfbLocation rfbLocation;
 
     @OneToMany(mappedBy = "rfbEvent")
+    @JsonIgnore
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<RfbEventAttendance> rfbEventAttendances = new HashSet<>();
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
+    // jhipster-needle-entity-add-field - Jhipster will add fields here, do not remove
     public Long getId() {
         return id;
     }
@@ -109,7 +111,7 @@ public class RfbEvent implements Serializable {
     public void setRfbEventAttendances(Set<RfbEventAttendance> rfbEventAttendances) {
         this.rfbEventAttendances = rfbEventAttendances;
     }
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
+    // jhipster-needle-entity-add-getters-setters - Jhipster will add getters and setters here, do not remove
 
     @Override
     public boolean equals(Object o) {

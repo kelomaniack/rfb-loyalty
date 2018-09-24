@@ -1,7 +1,8 @@
 package com.rfb.service.dto;
 
-import java.time.LocalDate;
+
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
 
 /**
@@ -15,7 +16,7 @@ public class RfbEventDTO implements Serializable {
 
     private String eventCode;
 
-    private Long rfbLocationId;
+    private RfbLocationDTO rfbLocationDTO;
 
     public Long getId() {
         return id;
@@ -41,12 +42,12 @@ public class RfbEventDTO implements Serializable {
         this.eventCode = eventCode;
     }
 
-    public Long getRfbLocationId() {
-        return rfbLocationId;
+    public RfbLocationDTO getRfbLocationDTO() {
+        return rfbLocationDTO;
     }
 
-    public void setRfbLocationId(Long rfbLocationId) {
-        this.rfbLocationId = rfbLocationId;
+    public void setRfbLocationDTO(RfbLocationDTO rfbLocationDTO) {
+        this.rfbLocationDTO = rfbLocationDTO;
     }
 
     @Override
@@ -59,7 +60,7 @@ public class RfbEventDTO implements Serializable {
         }
 
         RfbEventDTO rfbEventDTO = (RfbEventDTO) o;
-        if (rfbEventDTO.getId() == null || getId() == null) {
+        if(rfbEventDTO.getId() == null || getId() == null) {
             return false;
         }
         return Objects.equals(getId(), rfbEventDTO.getId());
@@ -76,7 +77,6 @@ public class RfbEventDTO implements Serializable {
             "id=" + getId() +
             ", eventDate='" + getEventDate() + "'" +
             ", eventCode='" + getEventCode() + "'" +
-            ", rfbLocation=" + getRfbLocationId() +
             "}";
     }
 }

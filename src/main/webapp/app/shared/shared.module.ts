@@ -1,15 +1,54 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
+import { DatePipe } from '@angular/common';
 
-import { NgbDateMomentAdapter } from './util/datepicker-adapter';
-import { RfbloyaltySharedLibsModule, RfbloyaltySharedCommonModule, JhiLoginModalComponent, HasAnyAuthorityDirective } from './';
+import {
+    RfbloyaltySharedLibsModule,
+    RfbloyaltySharedCommonModule,
+    CSRFService,
+    AuthServerProvider,
+    AccountService,
+    UserService,
+    StateStorageService,
+    LoginService,
+    LoginModalService,
+    Principal,
+    HasAnyAuthorityDirective,
+    JhiSocialComponent,
+    SocialService,
+    JhiLoginModalComponent
+} from './';
 
 @NgModule({
-    imports: [RfbloyaltySharedLibsModule, RfbloyaltySharedCommonModule],
-    declarations: [JhiLoginModalComponent, HasAnyAuthorityDirective],
-    providers: [{ provide: NgbDateAdapter, useClass: NgbDateMomentAdapter }],
+    imports: [
+        RfbloyaltySharedLibsModule,
+        RfbloyaltySharedCommonModule
+    ],
+    declarations: [
+        JhiSocialComponent,
+        JhiLoginModalComponent,
+        HasAnyAuthorityDirective
+    ],
+    providers: [
+        LoginService,
+        LoginModalService,
+        AccountService,
+        StateStorageService,
+        Principal,
+        CSRFService,
+        AuthServerProvider,
+        SocialService,
+        UserService,
+        DatePipe
+    ],
     entryComponents: [JhiLoginModalComponent],
-    exports: [RfbloyaltySharedCommonModule, JhiLoginModalComponent, HasAnyAuthorityDirective],
+    exports: [
+        RfbloyaltySharedCommonModule,
+        JhiSocialComponent,
+        JhiLoginModalComponent,
+        HasAnyAuthorityDirective,
+        DatePipe
+    ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
+
 })
 export class RfbloyaltySharedModule {}

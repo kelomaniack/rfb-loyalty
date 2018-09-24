@@ -1,29 +1,51 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {CUSTOM_ELEMENTS_SCHEMA, NgModule} from '@angular/core';
+import {RouterModule} from '@angular/router';
 
-import { RfbloyaltySharedModule } from 'app/shared';
+import {RfbloyaltySharedModule} from '../../shared';
 import {
     RfbEventComponent,
-    RfbEventDetailComponent,
-    RfbEventUpdateComponent,
-    RfbEventDeletePopupComponent,
     RfbEventDeleteDialogComponent,
+    RfbEventDeletePopupComponent,
+    RfbEventDetailComponent,
+    RfbEventDialogComponent,
+    RfbEventPopupComponent,
+    rfbEventPopupRoute,
+    RfbEventPopupService,
+    RfbEventResolvePagingParams,
     rfbEventRoute,
-    rfbEventPopupRoute
+    RfbEventService,
 } from './';
 
-const ENTITY_STATES = [...rfbEventRoute, ...rfbEventPopupRoute];
+const ENTITY_STATES = [
+    ...rfbEventRoute,
+    ...rfbEventPopupRoute,
+];
 
 @NgModule({
-    imports: [RfbloyaltySharedModule, RouterModule.forChild(ENTITY_STATES)],
+    imports: [
+        RfbloyaltySharedModule,
+        RouterModule.forRoot(ENTITY_STATES, { useHash: true })
+    ],
     declarations: [
         RfbEventComponent,
         RfbEventDetailComponent,
-        RfbEventUpdateComponent,
+        RfbEventDialogComponent,
         RfbEventDeleteDialogComponent,
-        RfbEventDeletePopupComponent
+        RfbEventPopupComponent,
+        RfbEventDeletePopupComponent,
     ],
-    entryComponents: [RfbEventComponent, RfbEventUpdateComponent, RfbEventDeleteDialogComponent, RfbEventDeletePopupComponent],
+    entryComponents: [
+        RfbEventComponent,
+        RfbEventDialogComponent,
+        RfbEventPopupComponent,
+        RfbEventDeleteDialogComponent,
+        RfbEventDeletePopupComponent,
+    ],
+    providers: [
+        RfbEventService,
+        RfbEventPopupService,
+        RfbEventResolvePagingParams,
+    ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class RfbloyaltyRfbEventModule {}

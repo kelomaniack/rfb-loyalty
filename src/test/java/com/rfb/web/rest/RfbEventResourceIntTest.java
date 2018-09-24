@@ -1,14 +1,12 @@
 package com.rfb.web.rest;
 
 import com.rfb.RfbloyaltyApp;
-
 import com.rfb.domain.RfbEvent;
 import com.rfb.repository.RfbEventRepository;
 import com.rfb.service.RfbEventService;
 import com.rfb.service.dto.RfbEventDTO;
 import com.rfb.service.mapper.RfbEventMapper;
 import com.rfb.web.rest.errors.ExceptionTranslator;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,8 +26,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
-
-import static com.rfb.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -55,7 +51,7 @@ public class RfbEventResourceIntTest {
 
     @Autowired
     private RfbEventMapper rfbEventMapper;
-    
+
     @Autowired
     private RfbEventService rfbEventService;
 
@@ -82,7 +78,6 @@ public class RfbEventResourceIntTest {
         this.restRfbEventMockMvc = MockMvcBuilders.standaloneSetup(rfbEventResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
             .setMessageConverters(jacksonMessageConverter).build();
     }
 
@@ -158,7 +153,7 @@ public class RfbEventResourceIntTest {
             .andExpect(jsonPath("$.[*].eventDate").value(hasItem(DEFAULT_EVENT_DATE.toString())))
             .andExpect(jsonPath("$.[*].eventCode").value(hasItem(DEFAULT_EVENT_CODE.toString())));
     }
-    
+
     @Test
     @Transactional
     public void getRfbEvent() throws Exception {
@@ -187,13 +182,10 @@ public class RfbEventResourceIntTest {
     public void updateRfbEvent() throws Exception {
         // Initialize the database
         rfbEventRepository.saveAndFlush(rfbEvent);
-
         int databaseSizeBeforeUpdate = rfbEventRepository.findAll().size();
 
         // Update the rfbEvent
-        RfbEvent updatedRfbEvent = rfbEventRepository.findById(rfbEvent.getId()).get();
-        // Disconnect from session so that the updates on updatedRfbEvent are not directly saved in db
-        em.detach(updatedRfbEvent);
+        RfbEvent updatedRfbEvent = rfbEventRepository.findOne(rfbEvent.getId());
         updatedRfbEvent
             .eventDate(UPDATED_EVENT_DATE)
             .eventCode(UPDATED_EVENT_CODE);
@@ -220,15 +212,15 @@ public class RfbEventResourceIntTest {
         // Create the RfbEvent
         RfbEventDTO rfbEventDTO = rfbEventMapper.toDto(rfbEvent);
 
-        // If the entity doesn't have an ID, it will throw BadRequestAlertException
+        // If the entity doesn't have an ID, it will be created instead of just being updated
         restRfbEventMockMvc.perform(put("/api/rfb-events")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
             .content(TestUtil.convertObjectToJsonBytes(rfbEventDTO)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isCreated());
 
         // Validate the RfbEvent in the database
         List<RfbEvent> rfbEventList = rfbEventRepository.findAll();
-        assertThat(rfbEventList).hasSize(databaseSizeBeforeUpdate);
+        assertThat(rfbEventList).hasSize(databaseSizeBeforeUpdate + 1);
     }
 
     @Test
@@ -236,7 +228,6 @@ public class RfbEventResourceIntTest {
     public void deleteRfbEvent() throws Exception {
         // Initialize the database
         rfbEventRepository.saveAndFlush(rfbEvent);
-
         int databaseSizeBeforeDelete = rfbEventRepository.findAll().size();
 
         // Get the rfbEvent

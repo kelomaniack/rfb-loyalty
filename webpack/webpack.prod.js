@@ -1,18 +1,16 @@
 const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const Visualizer = require('webpack-visualizer-plugin');
-const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const WorkboxPlugin = require('workbox-webpack-plugin');
-const AngularCompilerPlugin = require('@ngtools/webpack').AngularCompilerPlugin;
+const ngcWebpack = require('ngc-webpack');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const path = require('path');
 
 const utils = require('./utils.js');
 const commonConfig = require('./webpack.common.js');
 
 const ENV = 'production';
+const extractCSS = new ExtractTextPlugin(`[name].[hash].css`);
 
 module.exports = webpackMerge(commonConfig({ env: ENV }), {
     // Enable source maps. Please note that this will slow down the build.
@@ -21,7 +19,7 @@ module.exports = webpackMerge(commonConfig({ env: ENV }), {
     entry: {
         polyfills: './src/main/webapp/app/polyfills',
         global: './src/main/webapp/content/css/global.css',
-        main: './src/main/webapp/app/app.main'
+        main: './src/main/webapp/app/app.main-aot'
     },
     output: {
         path: utils.root('build/www'),
@@ -30,94 +28,71 @@ module.exports = webpackMerge(commonConfig({ env: ENV }), {
     },
     module: {
         rules: [{
-            test: /(?:\.ngfactory\.js|\.ngstyle\.js|\.ts)$/,
-            loader: '@ngtools/webpack'
+            test: /\.ts$/,
+            use: [
+                {
+                    loader: 'awesome-typescript-loader',
+                    options: {
+                        configFileName: 'tsconfig-aot.json'
+                    },
+                },
+                { loader: 'angular2-template-loader' }
+            ],
+            exclude: ['node_modules/generator-jhipster']
         },
         {
             test: /\.css$/,
-            use: ['to-string-loader', 'css-loader'],
+            loaders: ['to-string-loader', 'css-loader'],
             exclude: /(vendor\.css|global\.css)/
         },
         {
             test: /(vendor\.css|global\.css)/,
-            use: [
-                MiniCssExtractPlugin.loader,
-                'css-loader',
-                'postcss-loader'
-            ]
+            use: extractCSS.extract({
+                fallback: 'style-loader',
+                use: ['css-loader']
+            })
         }]
     },
-    optimization: {
-        runtimeChunk: false,
-        splitChunks: {
-            cacheGroups: {
-                commons: {
-                    test: /[\\/]node_modules[\\/]/,
-                    name: 'vendors',
-                    chunks: 'all'
-                }
-            }
-        },
-        minimizer: [
-            new TerserPlugin({
-                parallel: true,
-                cache: true,
-                terserOptions: {
-                    ie8: false,
-                    // sourceMap: true, // Enable source maps. Please note that this will slow down the build
-                    compress: {
-                        dead_code: true,
-                        warnings: false,
-                        properties: true,
-                        drop_debugger: true,
-                        conditionals: true,
-                        booleans: true,
-                        loops: true,
-                        unused: true,
-                        toplevel: true,
-                        if_return: true,
-                        inline: true,
-                        join_vars: true
-                    },
-                    output: {
-                        comments: false,
-                        beautify: false,
-                        indent_level: 2
-                    }
-                }
-            }),
-            new OptimizeCSSAssetsPlugin({})
-        ]
-    },
     plugins: [
-        new MiniCssExtractPlugin({
-            // Options similar to the same options in webpackOptions.output
-            // both options are optional
-            filename: '[name].[contenthash].css',
-            chunkFilename: '[id].css'
-        }),
-        new MomentLocalesPlugin({
-            localesToKeep: [
-                // jhipster-needle-i18n-language-moment-webpack - JHipster will add/remove languages in this array
-            ]
-        }),
+        extractCSS,
         new Visualizer({
             // Webpack statistics in target folder
             filename: '../stats.html'
         }),
-        new AngularCompilerPlugin({
-            mainPath: utils.root('src/main/webapp/app/app.main.ts'),
-            tsConfigPath: utils.root('tsconfig-aot.json'),
-            sourceMap: true
+        new UglifyJSPlugin({
+            parallel: true,
+            uglifyOptions: {
+                ie8: false,
+                // sourceMap: true, // Enable source maps. Please note that this will slow down the build
+                compress: {
+                    dead_code: true,
+                    warnings: false,
+                    properties: true,
+                    drop_debugger: true,
+                    conditionals: true,
+                    booleans: true,
+                    loops: true,
+                    unused: true,
+                    toplevel: true,
+                    if_return: true,
+                    inline: true,
+                    join_vars: true
+                },
+                output: {
+                    comments: false,
+                    beautify: false,
+                    indent_level: 2
+                }
+            }
+        }),
+        new ngcWebpack.NgcWebpackPlugin({
+            disabled: false,
+            tsConfig: utils.root('tsconfig-aot.json'),
+            resourceOverride: ''
         }),
         new webpack.LoaderOptionsPlugin({
             minimize: true,
             debug: false
-        }),
-        new WorkboxPlugin.GenerateSW({
-          clientsClaim: true,
-          skipWaiting: true,
         })
-    ],
-    mode: 'production'
+    ]
 });

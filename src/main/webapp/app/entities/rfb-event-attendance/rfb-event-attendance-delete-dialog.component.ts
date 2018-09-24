@@ -1,34 +1,37 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
 
-import { NgbActiveModal, NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { JhiEventManager } from 'ng-jhipster';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {JhiEventManager} from 'ng-jhipster';
 
-import { IRfbEventAttendance } from 'app/shared/model/rfb-event-attendance.model';
-import { RfbEventAttendanceService } from './rfb-event-attendance.service';
+import {RfbEventAttendance} from './rfb-event-attendance.model';
+import {RfbEventAttendancePopupService} from './rfb-event-attendance-popup.service';
+import {RfbEventAttendanceService} from './rfb-event-attendance.service';
 
 @Component({
     selector: 'jhi-rfb-event-attendance-delete-dialog',
     templateUrl: './rfb-event-attendance-delete-dialog.component.html'
 })
 export class RfbEventAttendanceDeleteDialogComponent {
-    rfbEventAttendance: IRfbEventAttendance;
+
+    rfbEventAttendance: RfbEventAttendance;
 
     constructor(
         private rfbEventAttendanceService: RfbEventAttendanceService,
         public activeModal: NgbActiveModal,
         private eventManager: JhiEventManager
-    ) {}
+    ) {
+    }
 
     clear() {
         this.activeModal.dismiss('cancel');
     }
 
     confirmDelete(id: number) {
-        this.rfbEventAttendanceService.delete(id).subscribe(response => {
+        this.rfbEventAttendanceService.delete(id).subscribe((response) => {
             this.eventManager.broadcast({
                 name: 'rfbEventAttendanceListModification',
-                content: 'Deleted an rfbEventAttendance'
+                content: 'Deleted an Event Attendance'
             });
             this.activeModal.dismiss(true);
         });
@@ -40,33 +43,22 @@ export class RfbEventAttendanceDeleteDialogComponent {
     template: ''
 })
 export class RfbEventAttendanceDeletePopupComponent implements OnInit, OnDestroy {
-    private ngbModalRef: NgbModalRef;
 
-    constructor(private activatedRoute: ActivatedRoute, private router: Router, private modalService: NgbModal) {}
+    routeSub: any;
+
+    constructor(
+        private route: ActivatedRoute,
+        private rfbEventAttendancePopupService: RfbEventAttendancePopupService
+    ) {}
 
     ngOnInit() {
-        this.activatedRoute.data.subscribe(({ rfbEventAttendance }) => {
-            setTimeout(() => {
-                this.ngbModalRef = this.modalService.open(RfbEventAttendanceDeleteDialogComponent as Component, {
-                    size: 'lg',
-                    backdrop: 'static'
-                });
-                this.ngbModalRef.componentInstance.rfbEventAttendance = rfbEventAttendance;
-                this.ngbModalRef.result.then(
-                    result => {
-                        this.router.navigate([{ outlets: { popup: null } }], { replaceUrl: true, queryParamsHandling: 'merge' });
-                        this.ngbModalRef = null;
-                    },
-                    reason => {
-                        this.router.navigate([{ outlets: { popup: null } }], { replaceUrl: true, queryParamsHandling: 'merge' });
-                        this.ngbModalRef = null;
-                    }
-                );
-            }, 0);
+        this.routeSub = this.route.params.subscribe((params) => {
+            this.rfbEventAttendancePopupService
+                .open(RfbEventAttendanceDeleteDialogComponent as Component, params['id']);
         });
     }
 
     ngOnDestroy() {
-        this.ngbModalRef = null;
+        this.routeSub.unsubscribe();
     }
 }

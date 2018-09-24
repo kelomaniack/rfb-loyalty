@@ -1,26 +1,26 @@
 package com.rfb.web.rest.errors;
 
-import com.rfb.web.rest.util.HeaderUtil;
-
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.zalando.problem.DefaultProblem;
 import org.zalando.problem.Problem;
 import org.zalando.problem.ProblemBuilder;
 import org.zalando.problem.Status;
+import org.zalando.problem.spring.web.advice.HttpStatusAdapter;
 import org.zalando.problem.spring.web.advice.ProblemHandling;
-import org.zalando.problem.violations.ConstraintViolationProblem;
+import org.zalando.problem.spring.web.advice.validation.ConstraintViolationProblem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -31,11 +31,11 @@ import java.util.stream.Collectors;
 public class ExceptionTranslator implements ProblemHandling {
 
     /**
-     * Post-process the Problem payload to add the message key for the front-end if needed
+     * Post-process Problem payload to add the message key for front-end if needed
      */
     @Override
-    public ResponseEntity<Problem> process(@Nullable ResponseEntity<Problem> entity, NativeWebRequest request) {
-        if (entity == null) {
+    public ResponseEntity<Problem> process(@Nullable ResponseEntity<Problem> entity) {
+        if (entity == null || entity.getBody() == null) {
             return entity;
         }
         Problem problem = entity.getBody();
@@ -45,13 +45,13 @@ public class ExceptionTranslator implements ProblemHandling {
         ProblemBuilder builder = Problem.builder()
             .withType(Problem.DEFAULT_TYPE.equals(problem.getType()) ? ErrorConstants.DEFAULT_TYPE : problem.getType())
             .withStatus(problem.getStatus())
-            .withTitle(problem.getTitle())
-            .with("path", request.getNativeRequest(HttpServletRequest.class).getRequestURI());
+            .withTitle(problem.getTitle());
 
         if (problem instanceof ConstraintViolationProblem) {
             builder
                 .with("violations", ((ConstraintViolationProblem) problem).getViolations())
                 .with("message", ErrorConstants.ERR_VALIDATION);
+            return new ResponseEntity<>(builder.build(), entity.getHeaders(), entity.getStatusCode());
         } else {
             builder
                 .withCause(((DefaultProblem) problem).getCause())
@@ -61,8 +61,8 @@ public class ExceptionTranslator implements ProblemHandling {
             if (!problem.getParameters().containsKey("message") && problem.getStatus() != null) {
                 builder.with("message", "error.http." + problem.getStatus().getStatusCode());
             }
+            return new ResponseEntity<>(builder.build(), entity.getHeaders(), entity.getStatusCode());
         }
-        return new ResponseEntity<>(builder.build(), entity.getHeaders(), entity.getStatusCode());
     }
 
     @Override
@@ -82,21 +82,27 @@ public class ExceptionTranslator implements ProblemHandling {
         return create(ex, problem, request);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<Problem> handleNoSuchElementException(NoSuchElementException ex, NativeWebRequest request) {
-        Problem problem = Problem.builder()
-            .withStatus(Status.NOT_FOUND)
-            .with("message", ErrorConstants.ENTITY_NOT_FOUND_TYPE)
-            .build();
-        return create(ex, problem, request);
+    /**
+     * Override default handler to take ResponseStatus annotation into account
+     */
+    @Override
+    public ResponseEntity<Problem> handleThrowable(
+        @Nonnull final Throwable throwable,
+        @Nonnull final NativeWebRequest request) {
+        ResponseStatus responseStatus = AnnotationUtils.findAnnotation(throwable.getClass(), ResponseStatus.class);
+        if (responseStatus != null) {
+            Problem problem = Problem.builder()
+                .withStatus(new HttpStatusAdapter(responseStatus.value()))
+                .withTitle(responseStatus.reason().isEmpty() ? responseStatus.value().getReasonPhrase() : responseStatus.reason() )
+                .withDetail(throwable.getMessage())
+                .build();
+            return create(throwable, problem, request);
+        } else {
+            return create(Status.INTERNAL_SERVER_ERROR, throwable, request);
+        }
     }
 
-    @ExceptionHandler
-    public ResponseEntity<Problem> handleBadRequestAlertException(BadRequestAlertException ex, NativeWebRequest request) {
-        return create(ex, request, HeaderUtil.createFailureAlert(ex.getEntityName(), ex.getErrorKey(), ex.getMessage()));
-    }
-
-    @ExceptionHandler
+    @ExceptionHandler(ConcurrencyFailureException.class)
     public ResponseEntity<Problem> handleConcurrencyFailure(ConcurrencyFailureException ex, NativeWebRequest request) {
         Problem problem = Problem.builder()
             .withStatus(Status.CONFLICT)

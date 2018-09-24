@@ -1,29 +1,51 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {CUSTOM_ELEMENTS_SCHEMA, NgModule} from '@angular/core';
+import {RouterModule} from '@angular/router';
 
-import { RfbloyaltySharedModule } from 'app/shared';
+import {RfbloyaltySharedModule} from '../../shared';
 import {
     RfbLocationComponent,
-    RfbLocationDetailComponent,
-    RfbLocationUpdateComponent,
-    RfbLocationDeletePopupComponent,
     RfbLocationDeleteDialogComponent,
+    RfbLocationDeletePopupComponent,
+    RfbLocationDetailComponent,
+    RfbLocationDialogComponent,
+    RfbLocationPopupComponent,
+    rfbLocationPopupRoute,
+    RfbLocationPopupService,
+    RfbLocationResolvePagingParams,
     rfbLocationRoute,
-    rfbLocationPopupRoute
+    RfbLocationService,
 } from './';
 
-const ENTITY_STATES = [...rfbLocationRoute, ...rfbLocationPopupRoute];
+const ENTITY_STATES = [
+    ...rfbLocationRoute,
+    ...rfbLocationPopupRoute,
+];
 
 @NgModule({
-    imports: [RfbloyaltySharedModule, RouterModule.forChild(ENTITY_STATES)],
+    imports: [
+        RfbloyaltySharedModule,
+        RouterModule.forRoot(ENTITY_STATES, { useHash: true })
+    ],
     declarations: [
         RfbLocationComponent,
         RfbLocationDetailComponent,
-        RfbLocationUpdateComponent,
+        RfbLocationDialogComponent,
         RfbLocationDeleteDialogComponent,
-        RfbLocationDeletePopupComponent
+        RfbLocationPopupComponent,
+        RfbLocationDeletePopupComponent,
     ],
-    entryComponents: [RfbLocationComponent, RfbLocationUpdateComponent, RfbLocationDeleteDialogComponent, RfbLocationDeletePopupComponent],
+    entryComponents: [
+        RfbLocationComponent,
+        RfbLocationDialogComponent,
+        RfbLocationPopupComponent,
+        RfbLocationDeleteDialogComponent,
+        RfbLocationDeletePopupComponent,
+    ],
+    providers: [
+        RfbLocationService,
+        RfbLocationPopupService,
+        RfbLocationResolvePagingParams,
+    ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class RfbloyaltyRfbLocationModule {}

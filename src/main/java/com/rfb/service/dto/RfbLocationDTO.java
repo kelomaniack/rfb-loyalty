@@ -1,5 +1,6 @@
 package com.rfb.service.dto;
 
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -48,7 +49,7 @@ public class RfbLocationDTO implements Serializable {
         }
 
         RfbLocationDTO rfbLocationDTO = (RfbLocationDTO) o;
-        if (rfbLocationDTO.getId() == null || getId() == null) {
+        if(rfbLocationDTO.getId() == null || getId() == null) {
             return false;
         }
         return Objects.equals(getId(), rfbLocationDTO.getId());
@@ -64,7 +65,7 @@ public class RfbLocationDTO implements Serializable {
         return "RfbLocationDTO{" +
             "id=" + getId() +
             ", locationName='" + getLocationName() + "'" +
-            ", runDayOfWeek=" + getRunDayOfWeek() +
+            ", runDayOfWeek='" + getRunDayOfWeek() + "'" +
             "}";
     }
 }

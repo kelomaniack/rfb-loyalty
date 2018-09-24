@@ -1,11 +1,8 @@
 package com.rfb.service;
 
 import com.rfb.service.dto.RfbLocationDTO;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.Optional;
 
 /**
  * Service Interface for managing RfbLocation.
@@ -21,26 +18,25 @@ public interface RfbLocationService {
     RfbLocationDTO save(RfbLocationDTO rfbLocationDTO);
 
     /**
-     * Get all the rfbLocations.
+     *  Get all the rfbLocations.
      *
-     * @param pageable the pagination information
-     * @return the list of entities
+     *  @param pageable the pagination information
+     *  @return the list of entities
      */
     Page<RfbLocationDTO> findAll(Pageable pageable);
 
-
     /**
-     * Get the "id" rfbLocation.
+     *  Get the "id" rfbLocation.
      *
-     * @param id the id of the entity
-     * @return the entity
+     *  @param id the id of the entity
+     *  @return the entity
      */
-    Optional<RfbLocationDTO> findOne(Long id);
+    RfbLocationDTO findOne(Long id);
 
     /**
-     * Delete the "id" rfbLocation.
+     *  Delete the "id" rfbLocation.
      *
-     * @param id the id of the entity
+     *  @param id the id of the entity
      */
     void delete(Long id);
 }

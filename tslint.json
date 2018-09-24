@@ -2,9 +2,6 @@
     "rulesDirectory": [
         "node_modules/codelyzer"
     ],
-    "extends": [
-        "tslint-config-prettier"
-    ],
     "rules": {
         "class-name": true,
         "comment-format": [
@@ -50,6 +47,7 @@
         "no-switch-case-fall-through": true,
         "no-trailing-whitespace": true,
         "no-unused-expression": true,
+        "no-use-before-declare": true,
         "no-var-keyword": true,
         "object-literal-sort-keys": false,
         "one-line": [
@@ -61,14 +59,11 @@
         ],
         "quotemark": [
             true,
-            "single",
-            "avoid-escape"
+            "single"
         ],
         "radix": true,
         "semicolon": [
-            true,
-            "always",
-            "ignore-bound-class-methods"
+            "always"
         ],
         "triple-equals": [
             true,
@@ -94,18 +89,12 @@
             "check-type"
         ],
         "prefer-const": true,
-        "arrow-parens": [true, "ban-single-arg-parens"],
+        "arrow-parens": [true],
         "arrow-return-shorthand": [true],
         "import-spacing": true,
         "no-consecutive-blank-lines": [true],
         "object-literal-shorthand": true,
-        "space-before-function-paren": [true, {
-            "asyncArrow": "always",
-            "anonymous": "never",
-            "constructor": "never",
-            "method": "never",
-            "named": "never"
-        }],
+        "space-before-function-paren": [true, "never"],
 
         "directive-selector": [true, "attribute", "jhi", "camelCase"],
         "component-selector": [true, "element", "jhi", "kebab-case"],
@@ -117,6 +106,9 @@
         "use-life-cycle-interface": true,
         "use-pipe-transform-interface": false,
         "component-class-suffix": true,
-        "directive-class-suffix": true
+        "directive-class-suffix": true,
+        "no-access-missing-member": true,
+        "templates-use-public": true,
+        "invoke-injectable": true
     }
 }
